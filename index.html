@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <script src="https://cdn.jsdelivr.net/chrono/1.3.1/chrono.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.2.0/firebase.js"></script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Picard</title>
@@ -29,7 +30,6 @@ section {
 
     width: 100%;
     border-radius: 0.2em;
-    /*box-shadow: 0 0.05em 0.1em gray;*/
     border-top: none;
     border-left: none;
     border-right: none;
@@ -37,6 +37,9 @@ section {
     padding: 1em;
     background: #fcffe0;
     background: white;
+}
+section:hover {
+    border-bottom: 0.1em solid #ccf;
 }
 section.done {
     opacity: 0.4;
@@ -146,7 +149,7 @@ section button.quit {
     float: right;
 }
 button.save {
-    margin: 2em;
+    margin-top: 1em;
     background-color:    hsl(180, 50%, 50%);
     border-bottom-color: hsl(180, 50%, 40%);
 }
@@ -551,7 +554,7 @@ Deck.prototype.init = function() {
     }, false);
 
     this.DOM_save = document.createElement('button');
-    this.DOM_save.textContent = 'Archive';
+    this.DOM_save.textContent = 'Export JSON archive...';
     this.DOM_save.className = 'save';
     this.DOM_save.addEventListener('click', function() {
         var arch = JSON.stringify(myself.dump(), null, 2)
@@ -596,30 +599,55 @@ Deck.load = function(o) {
     return d;
 };
 
-var d;
-if (localStorage.getItem('deck')) {
-    var d = Deck.load(JSON.parse(localStorage.getItem('deck')));
-} else {
-    var d = new Deck();
-}
+
+
+
+
+
+
+
+
+
+// The real deal
+
+var d = new Deck();
 document.body.appendChild(d.DOM_deck);
 
+firebase.initializeApp({
+    apiKey: "AIzaSyDtGjTV7gaDaeHFZb_qUCEYeDDKlhBHtdQ",
+    authDomain: "yolo-3ffe3.firebaseapp.com",
+    databaseURL: "https://yolo-3ffe3.firebaseio.com"
+});
+var database = firebase.database();
+
+var refName = localStorage.getItem('key') ||
+    prompt('What is your secret key?', "If you don't have one yet, make one up! Make it hard to guess.");
+localStorage.setItem('key', refName);
+var ref = database.ref(refName);
+
 function save() {
-    var dd = JSON.stringify(d.dump());
-    window.localStorage.setItem('deck', dd);
+    ref.set(JSON.stringify(d.dump()))
+        .then(function() {
+        })
+        .catch(function(e) {
+            document.body.style.backgroundColor = 'red';
+        });
 }
-function restore() {
-    var o = prompt('Enter your archive below:');
-    if (!o) {return;}
-    o = JSON.parse(o);
+function restore(o) {
+    console.log(o);
     document.body.removeChild(d.DOM_deck);
     d = Deck.load(o);
     document.body.appendChild(d.DOM_deck);
 }
 
+ref.on('value', function(snap) {
+    var o = snap.val();
+    if (o) restore(JSON.parse(snap.val()));
+});
+
+window.setInterval(function() { save(); }, 10000);
 window.addEventListener('unload', function() {
     save();
 }, false);
 
-window.setInterval(function() { save(); }, 10000);
 </script>
