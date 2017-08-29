@@ -556,7 +556,7 @@ Deck.prototype.init = function() {
     this.DOM_save.addEventListener('click', function() {
         var arch = JSON.stringify(myself.dump(), null, 2)
         //prompt("Copy the following:");
-        window.open('data:application/json,' + encodeURIComponent(arch));
+        window.open('data:text/plain;charset=utf8,' + encodeURIComponent(arch));
     }, false);
 
     this.render();
