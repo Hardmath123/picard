@@ -642,7 +642,8 @@ function restore(o) {
 
 ref.on('value', function(snap) {
     var o = snap.val();
-    if (o) restore(JSON.parse(snap.val()));
+    if (o === d.dump()) console.log("Nothing changed!");
+    if (o && o !== d.dump()) restore(JSON.parse(snap.val()));
 });
 
 window.setInterval(function() { save(); }, 10000);
