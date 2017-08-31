@@ -20,6 +20,16 @@ body {
     color: black;
     font-family: Tahoma, sans-serif;
 }
+.sync-notification {
+    position: fixed;
+    display: inline-block;
+    font-size: 0.8em;
+    padding: 0.2em;
+    background: green;
+    color: white;
+    bottom: 1em;
+    right: 1em;
+}
 section {
     display: block;
     margin-top: 1em;
@@ -628,6 +638,11 @@ var ref = database.ref(refName);
 function save() {
     ref.set(JSON.stringify(d.dump()))
         .then(function() {
+            var ok = document.createElement('div');
+            ok.textContent = 'Synced at ' + (moment(new Date()).format('h:mm[]a'));
+            ok.className = 'sync-notification';
+            document.body.appendChild(ok);
+            setTimeout(function() {document.body.removeChild(ok)}, 4000);
         })
         .catch(function(e) {
             alert("We just failed to sync to Firebase! Watch out!");
@@ -647,7 +662,7 @@ ref.on('value', function(snap) {
     if (o && changed) restore(JSON.parse(snap.val()));
 });
 
-window.setInterval(function() { save(); }, 1000);
+window.setInterval(function() { save(); }, 10000);
 window.addEventListener('unload', function() {
     save();
 }, false);
