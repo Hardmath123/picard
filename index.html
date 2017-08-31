@@ -630,6 +630,7 @@ function save() {
         .then(function() {
         })
         .catch(function(e) {
+            alert("We just failed to sync to Firebase! Watch out!");
             document.body.style.backgroundColor = 'red';
         });
 }
